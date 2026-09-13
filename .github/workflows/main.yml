@@ -2,28 +2,20 @@ name: nightly-build-gcc
 
 on:
   schedule:
-    # 每小时触发；在 job 内按 America/New_York 检查是否为 00:00
-    - cron: '0 * * * *'
+    # Run at 04:00 UTC daily.
+    # America/New_York midnight is 04:00 UTC during EDT (summer).
+    # During EST (winter) this runs at 23:00 New York time (1 hour early).
+    - cron: '0 4 * * *'
   workflow_dispatch:
-
+  
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 360
 
     steps:
       - name: Checkout repo (workspace for objdir)
         uses: actions/checkout@v4
-
-      - name: Only run at 00:00 America/New_York (ET)
-        id: et-check
-        run: |
-          hour=$(TZ=America/New_York date +%H)
-          echo "Current hour in America/New_York: $hour"
-          if [ "$hour" != "00" ]; then
-            echo "Not midnight ET — exiting job early."
-            exit 0
-          fi
-          echo "It's 00:00 ET — proceeding."
 
       - name: Install build dependencies
         run: |
@@ -32,7 +24,7 @@ jobs:
             build-essential \
             libgmp-dev libmpfr-dev libmpc-dev libisl-dev \
             flex bison texinfo gawk pkg-config libz-dev \
-            ca-certificates curl gcc-multilib g++-multilib
+            ca-certificates curl
 
       - name: Clone or update gcc mirror (full clone)
         run: |
@@ -42,7 +34,7 @@ jobs:
 
           if [ -d "$DEST" ]; then
             if [ -d "$DEST/.git" ]; then
-              echo "Directory $DEST exists and is a git repo — pulling latest changes"
+              echo "Directory $DEST exists and is a git repo — fetching and pulling latest changes"
               git -C "$DEST" fetch --all
               git -C "$DEST" pull --ff-only || git -C "$DEST" pull
             else
