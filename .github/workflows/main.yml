@@ -41,7 +41,8 @@ jobs:
           make -j"${JOBS}"
 
       - name: Upload objdir as artifact
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v7
         with:
           name: gcc-objdir
           path: objdir
+          overwrite: true
