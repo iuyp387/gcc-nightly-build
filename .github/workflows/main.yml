@@ -1,17 +1,11 @@
 name: nightly-build-gcc
 
 on:
-  schedule:
-    # Run at 04:00 UTC daily.
-    # America/New_York midnight is 04:00 UTC during EDT (summer).
-    # During EST (winter) this runs at 23:00 New York time (1 hour early).
-    - cron: '0 4 * * *'
   workflow_dispatch:
   
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
 
     steps:
       - name: Checkout repo (workspace for objdir)
@@ -24,37 +18,22 @@ jobs:
             build-essential \
             libgmp-dev libmpfr-dev libmpc-dev libisl-dev \
             flex bison texinfo gawk pkg-config libz-dev \
-            ca-certificates curl
+            ca-certificates curl gcc-multilib g++-multilib
 
       - name: Clone or update gcc mirror (full clone)
         run: |
           set -eux
           REPO=https://github.com/gcc-mirror/gcc
-          DEST=gcc-src
-
-          if [ -d "$DEST" ]; then
-            if [ -d "$DEST/.git" ]; then
-              echo "Directory $DEST exists and is a git repo — fetching and pulling latest changes"
-              git -C "$DEST" fetch --all
-              git -C "$DEST" pull --ff-only || git -C "$DEST" pull
-            else
-              echo "$DEST exists but is not a git repo — removing and cloning afresh"
-              rm -rf "$DEST"
-              git clone "$REPO" "$DEST"
-            fi
-          else
-            echo "Cloning full repository $REPO into $DEST"
-            git clone "$REPO" "$DEST"
-          fi
+          git clone "$REPO"
 
       - name: Configure in objdir (out-of-source; no options)
         run: |
           set -eux
           mkdir -p objdir
           cd objdir
-          ../gcc-src/configure
+          ../gcc/configure
 
-      - name: Build (no make clean)
+      - name: Build
         run: |
           set -eux
           cd objdir
@@ -62,7 +41,7 @@ jobs:
           make -j"${JOBS}"
 
       - name: Upload objdir as artifact (保存构建产物)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gcc-objdir
           path: objdir
