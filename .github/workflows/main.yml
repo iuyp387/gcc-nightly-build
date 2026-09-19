@@ -40,8 +40,8 @@ jobs:
           JOBS=$(nproc || echo 2)
           make -j"${JOBS}"
 
-      - name: Upload objdir as artifact (保存构建产物)
-        uses: actions/upload-artifact@v7
+      - name: Upload objdir as artifact
+        uses: actions/upload-artifact@v8
         with:
           name: gcc-objdir
           path: objdir
