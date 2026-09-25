@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - name: Checkout repo (workspace for objdir)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install build dependencies
         run: |
@@ -19,7 +19,12 @@ jobs:
             libgmp-dev libmpfr-dev libmpc-dev libisl-dev \
             flex bison texinfo gawk pkg-config libz-dev \
             ca-certificates curl gcc-multilib g++-multilib
-
+      
+      - uses: actions/download-artifact@v8
+        with:
+          name: gcc-objdir
+          path: objdir
+    
       - name: Clone or update gcc mirror (full clone)
         run: |
           set -eux
