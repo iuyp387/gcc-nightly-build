@@ -44,7 +44,7 @@ jobs:
         run: |
           set -eux
           cd objdir
-          JOBS=$(nproc || echo 2)
+          JOBS=$(nproc || echo 4)
           make -j"${JOBS}"
 
       - name: Upload objdir as artifact
