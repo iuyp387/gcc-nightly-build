@@ -20,10 +20,12 @@ jobs:
             flex bison texinfo gawk pkg-config libz-dev \
             ca-certificates curl gcc-multilib g++-multilib
       
-      - uses: actions/download-artifact@v8
+      - name: Download artifact from another run
+        uses: actions/download-artifact@v8
         with:
           name: gcc-objdir
-          path: objdir
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
     
       - name: Clone or update gcc mirror (full clone)
         run: |
